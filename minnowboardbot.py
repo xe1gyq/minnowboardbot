@@ -60,7 +60,19 @@ def psutilMemory():
     return result
 
 def psutilDisks():
-    return psutil.disk_partitions()
+    # Based on https://github.com/giampaolo/psutil/blob/master/examples/disk_usage.py
+    templ = "#DiskUsage Total %s Used %s Free %s Percent %s%% Filesystem %s Mountpoint %s"
+    for part in psutil.disk_partitions(all=False):
+        usage = psutil.disk_usage(part.mountpoint)
+        if part.mountpoint == '/':
+            templ = templ % (
+            bytes2human(usage.total),
+            bytes2human(usage.used),
+            bytes2human(usage.free),
+            int(usage.percent),
+            part.fstype,
+            part.mountpoint)
+    return templ
 
 def psutilNetwork():
     # Based on https://github.com/giampaolo/psutil/blob/master/examples/nettop.py
@@ -81,7 +93,7 @@ if __name__ == '__main__':
     twithonid = twythonConfiguration()
 
     modules = [psutilCpu, psutilMemory, psutilDisks, psutilNetwork, psutilUsers, psutilBootTime]
-    modules = [psutilBootTime, psutilCpu, psutilMemory, psutilNetwork]
+    modules = [psutilBootTime, psutilCpu, psutilDisks, psutilMemory, psutilNetwork]
     output = random.choice(modules)()
     minnowboardbot = '#MinnowBoard #MinnowBoardBot '
     status = minnowboardbot + output
