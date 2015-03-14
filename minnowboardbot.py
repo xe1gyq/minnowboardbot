@@ -49,7 +49,15 @@ def psutilCpu():
     return result
 
 def psutilMemory():
+    # Based on https://github.com/giampaolo/psutil/blob/master/examples/meminfo.py
+    result = '#MemoryUsage '
     output = psutil.virtual_memory()
+    for name in output._fields:
+        value = getattr(output, name)
+        if name != 'percent' and name != 'cached' and name != 'inactive':
+            value = bytes2human(value)
+            result = result + '%s %7s ' % (name.capitalize(), value)
+    return result
 
 def psutilDisks():
     return psutil.disk_partitions()
@@ -73,7 +81,7 @@ if __name__ == '__main__':
     twithonid = twythonConfiguration()
 
     modules = [psutilCpu, psutilMemory, psutilDisks, psutilNetwork, psutilUsers, psutilBootTime]
-    modules = [psutilCpu, psutilNetwork, psutilBootTime]
+    modules = [psutilBootTime, psutilCpu, psutilMemory, psutilNetwork]
     output = random.choice(modules)()
     minnowboardbot = '#MinnowBoard #MinnowBoardBot '
     status = minnowboardbot + output
