@@ -4,8 +4,26 @@ import ConfigParser
 import datetime
 import psutil
 import random
+import sys
 
 from twython import Twython
+
+def bytes2human(n):
+    """
+    >>> bytes2human(10000)
+    '9.8 Kb'
+    >>> bytes2human(100001221)
+    '95.4 Mb'
+    """
+    symbols = ('Kb', 'Mb', 'Gb', 'Tb', 'Pb', 'Eb', 'Zb', 'Yb')
+    prefix = {}
+    for i, s in enumerate(symbols):
+        prefix[s] = 1 << (i + 1) * 10
+    for s in reversed(symbols):
+        if n >= prefix[s]:
+            value = float(n) / prefix[s]
+            return '%.2f %s' % (value, s)
+    return '%.2f B' % (n)
 
 def twythonConfiguration():
     configuration = ConfigParser.ConfigParser()
@@ -37,7 +55,11 @@ def psutilDisks():
     return psutil.disk_partitions()
 
 def psutilNetwork():
-    return psutil.net_io_counters(pernic=True)
+    # Based on https://github.com/giampaolo/psutil/blob/master/examples/nettop.py
+    output = psutil.net_io_counters()
+    result = "#NetworkStatistics Bytes Tx %s Rx %s" % (bytes2human(output.bytes_sent), bytes2human(output.bytes_recv))
+    result = result + " Packets Tx %s Rx %s" % (output.packets_sent, output.packets_recv)
+    return result
 
 def psutilUsers():
     return psutil.users()
@@ -51,9 +73,9 @@ if __name__ == '__main__':
     twithonid = twythonConfiguration()
 
     modules = [psutilCpu, psutilMemory, psutilDisks, psutilNetwork, psutilUsers, psutilBootTime]
-    modules = [psutilCpu, psutilBootTime]
+    modules = [psutilCpu, psutilNetwork, psutilBootTime]
     output = random.choice(modules)()
-    minnowboardbot = '#MinnowBoard '
+    minnowboardbot = '#MinnowBoard #MinnowBoardBot '
     status = minnowboardbot + output
 
     twythonTimelineSet(twithonid, status, media=None)
