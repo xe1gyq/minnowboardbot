@@ -82,7 +82,11 @@ def psutilNetwork():
     return result
 
 def psutilUsers():
-    return psutil.users()
+    result = '#Users '
+    output = psutil.users()
+    for user in output:
+        result = result + " %s at %s " % (user.name, user.terminal or '-')
+    return result
 
 def psutilBootTime():
     output = datetime.datetime.fromtimestamp(psutil.boot_time()).strftime("%Y-%m-%d %H:%M:%S")
@@ -93,7 +97,7 @@ if __name__ == '__main__':
     twithonid = twythonConfiguration()
 
     modules = [psutilCpu, psutilMemory, psutilDisks, psutilNetwork, psutilUsers, psutilBootTime]
-    modules = [psutilBootTime, psutilCpu, psutilDisks, psutilMemory, psutilNetwork]
+    modules = [psutilBootTime, psutilCpu, psutilDisks, psutilMemory, psutilNetwork, psutilUsers]
     output = random.choice(modules)()
     minnowboardbot = '#MinnowBoard #MinnowBoardBot '
     status = minnowboardbot + output
