@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import commands
 import ConfigParser
 import datetime
 import psutil
@@ -104,11 +105,17 @@ def camera():
     mycamera.stop()
     return '#Camera Hi! Nice to meet you, this is me!', picturepygame
 
+def kernelVersion():
+    result = '#LinuxKernelVersion '
+    status, output = commands.getstatusoutput("uname -a")
+    result = result + output
+    return result, None
+
 if __name__ == '__main__':
 
     twithonid = twythonConfiguration()
 
-    modules = [camera, psutilBootTime, psutilCpu, psutilDisks, psutilMemory, psutilNetwork, psutilUsers]
+    modules = [camera, kernelVersion, psutilBootTime, psutilCpu, psutilDisks, psutilMemory, psutilNetwork, psutilUsers]
     output, media = random.choice(modules)()
     minnowboardbot = '#MinnowBoard #MinnowBoardBot '
     status = minnowboardbot + output
