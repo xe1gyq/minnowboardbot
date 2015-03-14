@@ -3,6 +3,8 @@
 import ConfigParser
 import datetime
 import psutil
+import pygame
+import pygame.camera
 import random
 import sys
 
@@ -46,7 +48,7 @@ def psutilCpu():
     output = psutil.cpu_times_percent(interval=1, percpu=False)
     result = '#CpuUtilizationPercentages User ' + "%.1f" % output.user + ' Nice ' + "%.1f" % output.nice
     result = result + ' System ' + "%.1f" % output.system + ' Idle ' + "%.1f" % output.idle
-    return result
+    return result, None
 
 def psutilMemory():
     # Based on https://github.com/giampaolo/psutil/blob/master/examples/meminfo.py
@@ -57,7 +59,7 @@ def psutilMemory():
         if name != 'percent' and name != 'cached' and name != 'inactive':
             value = bytes2human(value)
             result = result + '%s %7s ' % (name.capitalize(), value)
-    return result
+    return result, None
 
 def psutilDisks():
     # Based on https://github.com/giampaolo/psutil/blob/master/examples/disk_usage.py
@@ -72,36 +74,45 @@ def psutilDisks():
             int(usage.percent),
             part.fstype,
             part.mountpoint)
-    return templ
+    return templ, None
 
 def psutilNetwork():
     # Based on https://github.com/giampaolo/psutil/blob/master/examples/nettop.py
     output = psutil.net_io_counters()
     result = "#NetworkStatistics Bytes Tx %s Rx %s" % (bytes2human(output.bytes_sent), bytes2human(output.bytes_recv))
     result = result + " Packets Tx %s Rx %s" % (output.packets_sent, output.packets_recv)
-    return result
+    return result, None
 
 def psutilUsers():
     result = '#Users '
     output = psutil.users()
     for user in output:
         result = result + " %s at %s " % (user.name, user.terminal or '-')
-    return result
+    return result, None
 
 def psutilBootTime():
     output = datetime.datetime.fromtimestamp(psutil.boot_time()).strftime("%Y-%m-%d %H:%M:%S")
-    return '#BootTime since ' + output
+    return '#BootTime since ' + output, None
+
+def camera():
+    picturepygame = 'camerapygame.jpg'
+    pygame.camera.init()
+    mycamera = pygame.camera.Camera("/dev/video0",(1280,720))
+    mycamera.start()
+    image = mycamera.get_image()
+    pygame.image.save(image, picturepygame)
+    mycamera.stop()
+    return '#Camera Hi! Nice to meet you, this is me!', picturepygame
 
 if __name__ == '__main__':
 
     twithonid = twythonConfiguration()
 
-    modules = [psutilCpu, psutilMemory, psutilDisks, psutilNetwork, psutilUsers, psutilBootTime]
-    modules = [psutilBootTime, psutilCpu, psutilDisks, psutilMemory, psutilNetwork, psutilUsers]
-    output = random.choice(modules)()
+    modules = [camera, psutilBootTime, psutilCpu, psutilDisks, psutilMemory, psutilNetwork, psutilUsers]
+    output, media = random.choice(modules)()
     minnowboardbot = '#MinnowBoard #MinnowBoardBot '
     status = minnowboardbot + output
 
-    twythonTimelineSet(twithonid, status, media=None)
+    twythonTimelineSet(twithonid, status, media)
 
 # End of File
