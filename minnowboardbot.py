@@ -112,7 +112,7 @@ def camera():
     image = mycamera.get_image()
     pygame.image.save(image, picturepygame)
     mycamera.stop()
-    return '#Camera Hi! Nice to meet you, this is me!', picturepygame
+    return '#Camera Hi! This is me, nice to meet you! https://github.com/xe1gyq/minnowboardbot', picturepygame
 
 def kernelVersion():
     result = '#KernelVersion '
@@ -120,13 +120,18 @@ def kernelVersion():
     result = result + output
     return result, None
 
-def kernelRepository():
-    result = '#Mainline '
+def kernelPull():
     linuxkernelpath = '/home/xe1gyq/linux'
-    picturepath = '/home/xe1gyq/picture.png'
     repo = Repo(linuxkernelpath)
     o = repo.remotes.origin
     o.pull()
+    return linuxkernelpath, repo
+
+def kernelRepository():
+    result = '#Mainline '
+    linuxkernelpath, repo = kernelPull()
+    linuxkernelpath = '/home/xe1gyq/linux'
+    picturepath = '/home/xe1gyq/picture.png'
     headcommit = repo.head.commit
     print headcommit
     result = result + 'HEAD commit by ' + headcommit.author.name
@@ -136,11 +141,31 @@ def kernelRepository():
     status, output = commands.getstatusoutput(picture)
     return result, picturepath
 
+def kernelCompilation():
+    result = '#KernelCompilation '
+    picturepath = '/home/xe1gyq/picture.png'
+    linuxkernelpath, repo = kernelPull()
+    os.chdir(linuxkernelpath)
+    cmdmake = 'make -j5'
+    status, output = commands.getstatusoutput(cmdmake)
+    print status, output
+    if status == 0:
+        print 'Ok'
+        result = result + 'Ok'
+    else:
+        print 'Failed'
+        result = result + 'Failed'
+    result = result + ' @ kernelci.org'
+    picture = cmdmake + ' | convert -background black -fill white -font Helvetica -pointsize 14 -border 10 -bordercolor black label:@- ' + picturepath
+    status, output = commands.getstatusoutput(picture)
+    return result, picturepath
+
 if __name__ == '__main__':
 
     twithonid = twythonConfiguration()
 
-    modules = [camera, kernelRepository, kernelVersion, psutilBootTime, psutilCpu, psutilDisks, psutilMemory, psutilNetwork, psutilUsers]
+    modules = [camera, kernelCompilation, kernelRepository, kernelVersion,
+               psutilBootTime, psutilCpu, psutilDisks, psutilMemory, psutilNetwork, psutilUsers]
     output, media = random.choice(modules)()
     minnowboardbot = randomize(2) +  ' #MinnowBoard #MinnowBoardBot #Linux '
     status = minnowboardbot + output
