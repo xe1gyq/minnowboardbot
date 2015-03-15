@@ -8,8 +8,15 @@ import pygame
 import pygame.camera
 import random
 import sys
+import uuid
 
 from twython import Twython
+
+def randomize(length=10):
+    random = str(uuid.uuid4())
+    random = random.upper()
+    random = random.replace('-',"")
+    return random[0:length]
 
 def bytes2human(n):
     """
@@ -117,7 +124,7 @@ if __name__ == '__main__':
 
     modules = [camera, kernelVersion, psutilBootTime, psutilCpu, psutilDisks, psutilMemory, psutilNetwork, psutilUsers]
     output, media = random.choice(modules)()
-    minnowboardbot = '#MinnowBoard #MinnowBoardBot '
+    minnowboardbot = randomize(2) +  ' #MinnowBoard #MinnowBoardBot '
     status = minnowboardbot + output
 
     twythonTimelineSet(twithonid, status, media)
