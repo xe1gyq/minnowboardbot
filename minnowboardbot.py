@@ -137,7 +137,7 @@ def kernelRepository():
     result = result + 'HEAD commit by ' + headcommit.author.name
     #result = result + ' ' + headcommit.summary
     os.chdir(linuxkernelpath)
-    picture = 'git log --pretty --oneline -5 | convert -background black -fill white -font Helvetica -pointsize 14 -border 10 -bordercolor black label:@- ' + picturepath
+    picture = 'git log --pretty -p -1 | convert -background black -fill white -font Helvetica -pointsize 14 -border 10 -bordercolor black label:@- ' + picturepath
     status, output = commands.getstatusoutput(picture)
     return result, picturepath
 
@@ -146,7 +146,8 @@ def kernelCompilation():
     picturepath = '/home/xe1gyq/picture.png'
     linuxkernelpath, repo = kernelPull()
     os.chdir(linuxkernelpath)
-    cmdmake = 'make -j5'
+    commands.getstatusoutput('git log --pretty --oneline -5 2>&1 | tee -a /tmp/minnowboardbot.gitlog')
+    cmdmake = 'make -j5 2>&1 | tee -a /tmp/minnowboardbot.output'
     status, output = commands.getstatusoutput(cmdmake)
     print status, output
     if status == 0:
@@ -155,9 +156,11 @@ def kernelCompilation():
     else:
         print 'Failed'
         result = result + 'Failed'
-    result = result + ' @ kernelci.org'
-    picture = cmdmake + ' | convert -background black -fill white -font Helvetica -pointsize 14 -border 10 -bordercolor black label:@- ' + picturepath
+    result = result + ' ... See Minnowboard @ kernelci.org'
+    commands.getstatusoutput('cat /tmp/minnowboardbot.output >> /tmp/minnowboardbot.gitlog')
+    picture = 'cat /tmp/minnowboardbot.gitlog | convert -background black -fill white -font Helvetica -pointsize 14 -border 10 -bordercolor black label:@- ' + picturepath
     status, output = commands.getstatusoutput(picture)
+    commands.getstatusoutput('rm /tmp/minnowboardbot.*')
     return result, picturepath
 
 if __name__ == '__main__':
