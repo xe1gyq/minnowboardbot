@@ -3,6 +3,7 @@
 import commands
 import ConfigParser
 import datetime
+import os
 import psutil
 import pygame
 import pygame.camera
@@ -10,6 +11,7 @@ import random
 import sys
 import uuid
 
+from git import Repo
 from twython import Twython
 
 def randomize(length=10):
@@ -113,16 +115,32 @@ def camera():
     return '#Camera Hi! Nice to meet you, this is me!', picturepygame
 
 def kernelVersion():
-    result = '#LinuxKernelVersion '
+    result = '#KernelVersion '
     status, output = commands.getstatusoutput("uname -a")
     result = result + output
     return result, None
+
+def kernelRepository():
+    result = '#Mainline '
+    linuxkernelpath = '/home/xe1gyq/linux'
+    picturepath = '/home/xe1gyq/picture.png'
+    repo = Repo(linuxkernelpath)
+    o = repo.remotes.origin
+    o.pull()
+    headcommit = repo.head.commit
+    print headcommit
+    result = result + 'HEAD commit by ' + headcommit.author.name
+    #result = result + ' ' + headcommit.summary
+    os.chdir(linuxkernelpath)
+    picture = 'git log --pretty --oneline -5 | convert -background black -fill white -font Helvetica -pointsize 14 -border 10 -bordercolor black label:@- ' + picturepath
+    status, output = commands.getstatusoutput(picture)
+    return result, picturepath
 
 if __name__ == '__main__':
 
     twithonid = twythonConfiguration()
 
-    modules = [camera, kernelVersion, psutilBootTime, psutilCpu, psutilDisks, psutilMemory, psutilNetwork, psutilUsers]
+    modules = [camera, kernelRepository, kernelVersion, psutilBootTime, psutilCpu, psutilDisks, psutilMemory, psutilNetwork, psutilUsers]
     output, media = random.choice(modules)()
     minnowboardbot = randomize(2) +  ' #MinnowBoard #MinnowBoardBot #Linux '
     status = minnowboardbot + output
