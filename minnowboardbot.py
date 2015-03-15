@@ -64,7 +64,7 @@ def psutilMemory():
     output = psutil.virtual_memory()
     for name in output._fields:
         value = getattr(output, name)
-        if name != 'percent' and name != 'cached' and name != 'inactive':
+        if name != 'percent' and name != 'cached' and name != 'inactive' and name != 'buffers':
             value = bytes2human(value)
             result = result + '%s %7s ' % (name.capitalize(), value)
     return result, None
@@ -124,7 +124,7 @@ if __name__ == '__main__':
 
     modules = [camera, kernelVersion, psutilBootTime, psutilCpu, psutilDisks, psutilMemory, psutilNetwork, psutilUsers]
     output, media = random.choice(modules)()
-    minnowboardbot = randomize(2) +  ' #MinnowBoard #MinnowBoardBot '
+    minnowboardbot = randomize(2) +  ' #MinnowBoard #MinnowBoardBot #Linux '
     status = minnowboardbot + output
 
     twythonTimelineSet(twithonid, status, media)
