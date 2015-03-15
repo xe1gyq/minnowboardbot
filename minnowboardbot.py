@@ -112,7 +112,7 @@ def camera():
     image = mycamera.get_image()
     pygame.image.save(image, picturepygame)
     mycamera.stop()
-    return '#Camera Hi! This is me, nice to meet you! https://github.com/xe1gyq/minnowboardbot', picturepygame
+    return '#Camera #Selfie Hi! This is me, nice to meet you! https://github.com/xe1gyq/minnowboardbot', picturepygame
 
 def kernelVersion():
     result = '#KernelVersion '
