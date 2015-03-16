@@ -147,6 +147,8 @@ def kernelCompilation():
     linuxkernelpath, repo = kernelPull()
     os.chdir(linuxkernelpath)
     commands.getstatusoutput('git log --pretty --oneline -5 2>&1 | tee -a /tmp/minnowboardbot.gitlog')
+    cmdmake = 'make olddefconfig'
+    status, output = commands.getstatusoutput(cmdmake)
     cmdmake = 'make -j5 2>&1 | tee -a /tmp/minnowboardbot.output'
     status, output = commands.getstatusoutput(cmdmake)
     print status, output
