@@ -114,6 +114,16 @@ def camera():
     mycamera.stop()
     return '#Camera #Selfie Hi! This is me, nice to meet you! https://github.com/xe1gyq/minnowboardbot', picturepygame
 
+def mersenne():
+    datafile = file("/home/xe1gyq/labs/prime.log")
+    for line in datafile:
+        if "Got" in line:
+            result = ''
+            remove, space, result = line.partition(' ')
+            remove, space, result = result.partition(' ')
+    result = "#Mersenne www.mersenne.org " + result
+    return result, None
+
 def kernelVersion():
     result = '#KernelVersion '
     status, output = commands.getstatusoutput("uname -a")
@@ -179,7 +189,7 @@ if __name__ == '__main__':
 
     twithonid = twythonConfiguration()
 
-    modules = [camera, kernelCompilation, kernelRepository, kernelVersion, kernelName,
+    modules = [camera, kernelCompilation, kernelRepository, kernelVersion, kernelName, mersenne,
                psutilBootTime, psutilCpu, psutilDisks, psutilMemory, psutilNetwork, psutilUsers]
     output, media = random.choice(modules)()
     minnowboardbot = randomize(2) +  ' #MinnowBoard #MinnowBoardBot #Linux '
