@@ -141,6 +141,16 @@ def kernelRepository():
     status, output = commands.getstatusoutput(picture)
     return result, picturepath
 
+def kernelName():
+    datafile = file("/home/xe1gyq/linux/Makefile")
+    for line in datafile:
+        if "NAME" in line:
+            remove, space, result = line.partition(' ')
+            remove, space, result = result.partition(' ')
+            break
+    result = "#KernelName " + result
+    return result, None
+
 def kernelCompilation():
     result = '#KernelCompilation '
     picturepath = '/home/xe1gyq/picture.png'
@@ -169,7 +179,7 @@ if __name__ == '__main__':
 
     twithonid = twythonConfiguration()
 
-    modules = [camera, kernelCompilation, kernelRepository, kernelVersion,
+    modules = [camera, kernelCompilation, kernelRepository, kernelVersion, kernelName,
                psutilBootTime, psutilCpu, psutilDisks, psutilMemory, psutilNetwork, psutilUsers]
     output, media = random.choice(modules)()
     minnowboardbot = randomize(2) +  ' #MinnowBoard #MinnowBoardBot #Linux '
