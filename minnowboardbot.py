@@ -152,13 +152,17 @@ def kernelRepository():
     return result, picturepath
 
 def kernelName():
+    linuxkernelpath = '/home/xe1gyq/linux'
+    os.chdir(linuxkernelpath)
+    status, output = commands.getstatusoutput("git tag -l")
+    tag = output.splitlines()[-1:]
     datafile = file("/home/xe1gyq/linux/Makefile")
     for line in datafile:
         if "NAME" in line:
             remove, space, result = line.partition(' ')
             remove, space, result = result.partition(' ')
             break
-    result = "#KernelName " + result
+    result = '#KernelName ' + str(tag) + ' ' + result
     return result, None
 
 def kernelCompilation():
