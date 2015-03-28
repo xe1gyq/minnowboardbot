@@ -75,6 +75,7 @@ def twythonConfiguration():
     return twythonid
 
 def twythonTimelineSet(twitterid, status, media):
+    logging.info(status)
     if media:
         photo = open(media,'rb')
         twythonid.update_status_with_media(media=photo, status=status)
@@ -137,22 +138,21 @@ def kernelPull(branch):
     return linuxkernelpath, repo
 
 def kernelCompilation(linuxkernelpath, repo):
-    result = '#LinuxKernel #KernelCompilation ' + repo  +' '
+    result = '#LinuxKernel Compilation ' + repo  +' '
     picturepath = '/home/xe1gyq/picture.png'
     os.chdir(linuxkernelpath)
     status, output = commands.getstatusoutput('git log --pretty --oneline -5 2>&1 | tee -a /tmp/minnowboardbot.gitlog')
-    cmdmake = 'make olddefconfig'
+    cmdmake = 'make tinyconfig'
     status, output = commands.getstatusoutput(cmdmake)
     cmdmake = 'make -j5 2>&1 | tee -a /tmp/minnowboardbot.output'
     status, output = commands.getstatusoutput(cmdmake)
-    print status, output
     if status == 0:
         print 'Ok'
         result = result + 'Ok'
     else:
         print 'Failed'
         result = result + 'Failed'
-    result = result + ' ... See Minnowboard @ kernelci.org'
+    result = result + ' ... See me @ kernelci.org'
     commands.getstatusoutput('cat /tmp/minnowboardbot.output >> /tmp/minnowboardbot.gitlog')
     picture = 'cat /tmp/minnowboardbot.gitlog | convert -background black -fill white -font Helvetica -pointsize 14 -border 10 -bordercolor black label:@- ' + picturepath
     status, output = commands.getstatusoutput(picture)
