@@ -41,14 +41,14 @@ def minnowboardBotExecute(output, media):
 
 def minnowboardBotScheduler():
     scheduler = Scheduler(misfire_grace_time=3600, coalesce=True, threadpool=ThreadPool(max_threads=1))
-    schedule(scheduler)
+    minnowboardBotSchedulerModules(scheduler)
     scheduler.start()
     scheduler.print_jobs()
 
 def minnowboardBotSchedulerModules(scheduler):
-    scheduler.add_interval_job(psUtilExecute, minutes=30)
-    scheduler.add_interval_job(kernelExecute, minutes=60)
-    scheduler.add_interval_job(mersennePrime, minutes=120)
+    scheduler.add_interval_job(psutilExecute, minutes=60)
+    scheduler.add_interval_job(mersennePrime, minutes=60)
+    scheduler.add_interval_job(kernelExecute, minutes=120)
 
 def minnowboardBotModule(module):
     if module == "psutil":
