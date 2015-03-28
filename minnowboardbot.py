@@ -20,6 +20,10 @@ from apscheduler.threadpool import ThreadPool
 from git import Repo
 from twython import Twython
 
+#===============================================================================
+# MinnowboardBot
+#===============================================================================
+
 def minnowboardBotSetup():
     global twythonid
     twythonid = twythonConfiguration()
