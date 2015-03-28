@@ -42,8 +42,9 @@ def minnowboardBotScheduler():
     scheduler.print_jobs()
 
 def minnowboardBotSchedulerModules(scheduler):
-    scheduler.add_interval_job(psUtilExecute, minutes=60)
+    scheduler.add_interval_job(psUtilExecute, minutes=30)
     scheduler.add_interval_job(kernelExecute, minutes=60)
+    scheduler.add_interval_job(mersennePrime, minutes=120)
 
 def minnowboardBotModule(module):
     if module == "psutil":
@@ -282,7 +283,7 @@ def psutilExecute():
 	time.sleep(1)
 
 #===============================================================================
-# Cientific Section
+# Cientific
 #===============================================================================
 
 def mersennePrime():
@@ -294,6 +295,10 @@ def mersennePrime():
             remove, space, result = result.partition(' ')
     result = "#Mersenne www.mersenne.org " + result
     minnowboardBotExecute(result, None)
+
+#===============================================================================
+# Main
+#===============================================================================
 
 if __name__ == '__main__':
 
