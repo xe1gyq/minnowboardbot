@@ -125,21 +125,42 @@ def mersenne():
     return result, None
 
 def kernelVersion():
-    result = '#KernelVersion '
+    result = '#LinuxKernel #KernelVersion '
     status, output = commands.getstatusoutput("uname -a")
     result = result + output
     return result, None
 
-def kernelPull():
+def kernelPull(branch):
     linuxkernelpath = '/home/xe1gyq/linux'
     repo = Repo(linuxkernelpath)
+    git = repo.git
     o = repo.remotes.origin
+    git.reset('--hard', 'HEAD')
+    print branch
+    try:
+	git.checkout(branch)
+    except:
+        pass
     o.pull()
     return linuxkernelpath, repo
 
-def kernelRepository():
-    result = '#Mainline '
-    linuxkernelpath, repo = kernelPull()
+def kernelRepositoryMainline():
+    result = '#LinuxKernel #Mainline '
+    linuxkernelpath, repo = kernelPull('master')
+    linuxkernelpath = '/home/xe1gyq/linux'
+    picturepath = '/home/xe1gyq/picture.png'
+    headcommit = repo.head.commit
+    print headcommit
+    result = result + 'HEAD commit by ' + headcommit.author.name
+    #result = result + ' ' + headcommit.summary
+    os.chdir(linuxkernelpath)
+    picture = 'git log --pretty -p -1 | convert -background black -fill white -font Helvetica -pointsize 14 -border 10 -bordercolor black label:@- ' + picturepath
+    status, output = commands.getstatusoutput(picture)
+    return result, picturepath
+
+def kernelRepositoryLinuxNext():
+    result = '#LinuxKernel #Next '
+    linuxkernelpath, repo = kernelPull('akpm')
     linuxkernelpath = '/home/xe1gyq/linux'
     picturepath = '/home/xe1gyq/picture.png'
     headcommit = repo.head.commit
@@ -162,20 +183,30 @@ def kernelName():
             remove, space, result = line.partition(' ')
             remove, space, result = result.partition(' ')
             break
-    result = '#KernelName ' + str(tag) + ' ' + result
+    result = '#LinuxKernel #KernelName ' + str(tag) + ' ' + result
     return result, None
 
-def kernelCompilation():
-    result = '#KernelCompilation '
+def kernelCompilationLinuxNext():
+    linuxkernelpath, repo = kernelPull("akpm")
+    result, picturepath = kernelCompilation(linuxkernelpath, "#LinuxNext")
+    return result, picturepath
+
+def kernelCompilationMainline():
+    linuxkernelpath, repo = kernelPull("master")
+    result, picturepath = kernelCompilation(linuxkernelpath, "#Mainline")
+    return result, picturepath
+
+def kernelCompilation(linuxkernelpath, repo):
+    result = '#LinuxKernel #KernelCompilation ' + repo  +' '
     picturepath = '/home/xe1gyq/picture.png'
-    linuxkernelpath, repo = kernelPull()
     os.chdir(linuxkernelpath)
-    commands.getstatusoutput('git log --pretty --oneline -5 2>&1 | tee -a /tmp/minnowboardbot.gitlog')
+    status, output = commands.getstatusoutput('git log --pretty --oneline -5 2>&1 | tee -a /tmp/minnowboardbot.gitlog')
     cmdmake = 'make olddefconfig'
     status, output = commands.getstatusoutput(cmdmake)
     cmdmake = 'make -j5 2>&1 | tee -a /tmp/minnowboardbot.output'
     status, output = commands.getstatusoutput(cmdmake)
     print status, output
+    status = 0
     if status == 0:
         print 'Ok'
         result = result + 'Ok'
@@ -193,7 +224,9 @@ if __name__ == '__main__':
 
     twithonid = twythonConfiguration()
 
-    modules = [camera, kernelCompilation, kernelRepository, kernelVersion, kernelName, mersenne,
+    modules = [kernelCompilationMainline, kernelCompilationLinuxNext,
+               kernelRepositoryMainline, kernelRepositoryLinuxNext,
+               kernelVersion, kernelName, mersenne, camera,
                psutilBootTime, psutilCpu, psutilDisks, psutilMemory, psutilNetwork, psutilUsers]
     output, media = random.choice(modules)()
     minnowboardbot = randomize(2) +  ' #MinnowBoard #MinnowBoardBot #Linux '
