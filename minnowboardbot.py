@@ -217,7 +217,8 @@ def kernelCompilationMainline():
 
 def kernelExecute():
     modules = [kernelName, kernelVersion,
-               kernelRepositoryMainline, kernelRepositoryLinuxNext]
+               kernelRepositoryMainline, kernelRepositoryLinuxNext,
+               kernelCompilationLinuxNext, kernelCompilationMainline]
     for module in modules:
         module()
 	time.sleep(1)
