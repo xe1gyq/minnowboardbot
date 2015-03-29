@@ -13,12 +13,16 @@ import random
 import sys
 import time
 import uuid
+import httplib, urllib
+from time import localtime, strftime
 
 from apscheduler.scheduler import Scheduler
 from apscheduler.threadpool import ThreadPool
 
 from git import Repo
 from twython import Twython
+
+thingspeakdata = dict()
 
 #===============================================================================
 # MinnowboardBot
@@ -59,6 +63,8 @@ def minnowboardBotModule(module):
         kernelCompilationLinuxNext()
     elif module == "cmainline":
         kernelCompilationMainline()
+    elif module == "thingspeak":
+        thingspeakSite()
 
 #===============================================================================
 # Twython
@@ -153,7 +159,7 @@ def kernelCompilation(linuxkernelpath, repo):
         print 'Failed'
         result = result + 'Failed'
     result = result + ' ... See me @ kernelci.org'
-    commands.getstatusoutput('cat /tmp/minnowboardbot.output >> /tmp/minnowboardbot.gitlog')
+    # commands.getstatusoutput('cat /tmp/minnowboardbot.gitlog >> /tmp/minnowboardbot.output')
     picture = 'cat /tmp/minnowboardbot.gitlog | convert -background black -fill white -font Helvetica -pointsize 14 -border 10 -bordercolor black label:@- ' + picturepath
     status, output = commands.getstatusoutput(picture)
     commands.getstatusoutput('rm /tmp/minnowboardbot.*')
@@ -239,6 +245,8 @@ def psutilCpu():
     output = psutil.cpu_times_percent(interval=1, percpu=False)
     result = '#CpuUtilizationPercentages User ' + "%.1f" % output.user + ' Nice ' + "%.1f" % output.nice
     result = result + ' System ' + "%.1f" % output.system + ' Idle ' + "%.1f" % output.idle
+    datacpu = psutil.cpu_percent()
+    thingspeakdata['field1'] = str('100')
     minnowboardBotExecute(result, None)
 
 def psutilDisks():
@@ -265,6 +273,10 @@ def psutilMemory():
         if name != 'percent' and name != 'cached' and name != 'inactive' and name != 'buffers':
             value = bytes2human(value)
             result = result + '%s %7s ' % (name.capitalize(), value)
+    datamem = psutil.avail_phymem()/1000000
+    print psutil.avail_phymem()
+    print datamem
+    thingspeakdata['field2'] = str(datamem)
     minnowboardBotExecute(result, None)
 
 def psutilNetwork():
@@ -286,6 +298,7 @@ def psutilExecute():
     for module in modules:
         module()
 	time.sleep(1)
+    thingSpeak()
 
 #===============================================================================
 # Cientific
@@ -299,6 +312,28 @@ def mersennePrime():
             remove, space, result = line.partition(' ')
             remove, space, result = result.partition(' ')
     result = "#Mersenne www.mersenne.org " + result
+    minnowboardBotExecute(result, None)
+
+def thingSpeak():
+    print thingspeakdata
+    params = urllib.urlencode({ \
+             'field1': thingspeakdata.get('field1'), \
+             'field2': thingspeakdata.get('field2'), \
+             'key':'GJWOWBP58MUWRQ9X'})
+    headers = {"Content-type": "application/x-www-form-urlencoded","Accept": "text/plain"}
+    conn = httplib.HTTPConnection("api.thingspeak.com:80")
+
+    try:
+        conn.request("POST", "/update", params, headers)
+        response = conn.getresponse()
+        print response.status, response.reason
+        data = response.read()
+        print data
+        conn.close()
+    except:
+        print "ThingSpeak Connection Failed"
+
+    result = '#ThingSpeak Minnowboard Data @ https://thingspeak.com/channels/31770'
     minnowboardBotExecute(result, None)
 
 #===============================================================================
