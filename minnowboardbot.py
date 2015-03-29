@@ -274,14 +274,14 @@ def psutilMemory():
             value = bytes2human(value)
             result = result + '%s %7s ' % (name.capitalize(), value)
     datamem = psutil.avail_phymem()/1000000
-    print psutil.avail_phymem()
-    print datamem
     thingspeakdata['field2'] = str(datamem)
     minnowboardBotExecute(result, None)
 
 def psutilNetwork():
     # Based on https://github.com/giampaolo/psutil/blob/master/examples/nettop.py
     output = psutil.net_io_counters()
+    thingspeakdata['field3'] = str(output.bytes_sent)
+    thingspeakdata['field4'] = str(output.bytes_recv)
     result = "#NetworkStatistics Bytes Tx %s Rx %s" % (bytes2human(output.bytes_sent), bytes2human(output.bytes_recv))
     result = result + " Packets Tx %s Rx %s" % (output.packets_sent, output.packets_recv)
     minnowboardBotExecute(result, None)
@@ -319,6 +319,8 @@ def thingSpeak():
     params = urllib.urlencode({ \
              'field1': thingspeakdata.get('field1'), \
              'field2': thingspeakdata.get('field2'), \
+             'field3': thingspeakdata.get('field3'), \
+             'field4': thingspeakdata.get('field4'), \
              'key':'GJWOWBP58MUWRQ9X'})
     headers = {"Content-type": "application/x-www-form-urlencoded","Accept": "text/plain"}
     conn = httplib.HTTPConnection("api.thingspeak.com:80")
