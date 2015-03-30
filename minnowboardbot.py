@@ -36,7 +36,7 @@ def minnowboardBotSetup():
 def minnowboardBotExecute(output, media):
     modules = [kernelCompilationMainline, kernelCompilationLinuxNext,
                kernelRepositoryMainline, kernelRepositoryLinuxNext,
-               kernelVersion, kernelName, mersennePrime, camera,
+               kernelVersion, kernelName, mersennePrime, selfieTake,
                psutilBootTime, psutilCpu, psutilDisks, psutilMemory, psutilNetwork, psutilUsers]
     minnowboardbotmessage = randomize(2) +  ' #MinnowBoard #MinnowBoardBot #Linux '
     status = minnowboardbotmessage + output
@@ -50,12 +50,15 @@ def minnowboardBotScheduler():
     scheduler.print_jobs()
 
 def minnowboardBotSchedulerModules(scheduler):
+    scheduler.add_interval_job(selfieTake, minutes=60)
     scheduler.add_interval_job(psutilExecute, minutes=60)
     scheduler.add_interval_job(mersennePrime, minutes=60)
     scheduler.add_interval_job(kernelExecute, minutes=120)
 
 def minnowboardBotModule(module):
-    if module == "psutil":
+    if module == "selfie":
+        selfieTake()
+    elif module == "psutil":
         psutilExecute()
     elif module == "kernel":
         kernelExecute()
@@ -108,16 +111,6 @@ def bytes2human(n):
             value = float(n) / prefix[s]
             return '%.2f %s' % (value, s)
     return '%.2f B' % (n)
-
-def camera():
-    picturepygame = 'camerapygame.jpg'
-    pygame.camera.init()
-    mycamera = pygame.camera.Camera("/dev/video0",(1280,720))
-    mycamera.start()
-    image = mycamera.get_image()
-    pygame.image.save(image, picturepygame)
-    mycamera.stop()
-    return '#Camera #Selfie Hi! This is me, nice to meet you! https://github.com/xe1gyq/minnowboardbot', picturepygame
 
 def randomize(length=10):
     random = str(uuid.uuid4())
@@ -303,6 +296,17 @@ def psutilExecute():
 #===============================================================================
 # Cientific
 #===============================================================================
+
+def selfieTake():
+    picturepygame = 'camerapygame.jpg'
+    pygame.camera.init()
+    mycamera = pygame.camera.Camera("/dev/video0",(1280,720))
+    mycamera.start()
+    image = mycamera.get_image()
+    pygame.image.save(image, picturepygame)
+    mycamera.stop()
+    result = '#Camera #Selfie Hi! This is me, nice to meet you! https://github.com/xe1gyq/minnowboardbot'
+    minnowboardBotExecute(result, picturepygame)
 
 def mersennePrime():
     datafile = file("/home/xe1gyq/labs/prime.log")
